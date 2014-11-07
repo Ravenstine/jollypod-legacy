@@ -6,13 +6,15 @@ class TestsController < ApplicationController
   def show
     video_url = ViddlRb.get_urls("https://www.youtube.com/watch?v=#{params[:id]}").first
     curl_cmd = "curl '#{video_url}' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8' -H 'Connection: keep-alive' -H 'Accept-Encoding: gzip,deflate,sdch' -H 'Accept-Language: en-US,en;q=0.8' -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 Safari/537.36' --compressed"
-    cmd = "exec #{curl_cmd} | ffmpeg -y -i pipe:0 -ac 1 -ab 32000 -ar 22050 -f mp3 -"
+    cmd = "exec #{curl_cmd} | ffmpeg -y -i pipe:0 -ac 1 -ab 16000 -ar 22050 -f mp3 -"
     response.headers['Content-Type'] = 'audio/mp3'
     response.headers['Content-Transfer-Encoding'] = 'binary'
     response.headers['Content-Disposition'] = 'attachment; filename="test.mp3"'
     response.sending_file = false
-
-    Open3.popen2(cmd) do |stdin, stdout|
+    
+    pid = nil
+    Open3.popen2(cmd) do |stdin, stdout, wait_thr|
+      pid = wait_thr.pid
       stdout.each do |blob|
         response.stream.write blob
       end
@@ -20,6 +22,7 @@ class TestsController < ApplicationController
   rescue IOError
     puts "Stream closed."
   ensure
+    `kill -9 #{pid}`
     response.stream.close
   end
 
