@@ -7,10 +7,30 @@ class Playlist
   def initialize id
     @id = id
     @pages = []
+    @items = []
   end
 
   def to_podcast
+    download_info
     download_pages
+    pages_to_items!
+
+    "<?xml version='1.0' encoding='utf-8'?>
+     <rss version='2.0' xmlns:itunes='http://www.itunes.com/DTDs/Podcast-1.0.dtd' xmlns:media='http://search.yahoo.com/mrss/'>
+      <channel>
+        <title>#{@title}</title>
+        <description>#{@description}</description>
+        <itunes:author>#{@author}</itunes:author>
+        <link>#{@link}</link>
+        <itunes:image href='#{@image}'></itunes:image>
+        <pubDate>#{@pub_date}</pubDate>
+        <language>#{@language}</language>
+        <copyright>#{@copyright}</copyright>
+
+        #{items_to_s}
+
+      </channel>
+    </rss>"
   end
 
   def download_pages
@@ -26,17 +46,23 @@ class Playlist
       end
     end
 
-    # binding.pry
   end
-
-
-  
-
 
   def download_page next_page_token=nil
     uri = "https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&maxResults=50&playlistId=#{@id}&key=#{Rails.application.secrets.youtube_api_key}"
     uri += "&pageToken=#{next_page_token}" if next_page_token
     JSON.parse URI.parse(uri).read
+  end
+
+  def pages_to_items!
+    @pages.count.times do
+      page = @pages.pop
+      page["items"].each do |item|
+        new_item = Item.new(item["contentDetails"]["videoId"])
+        new_item.download_info
+        @items << new_item
+      end
+    end
   end
 
   def download_info
@@ -52,5 +78,14 @@ class Playlist
       nil
     end
   end
+
+  def items_to_s
+    output = ""
+    @items.each do |item|
+      output += item.to_s
+    end
+    output
+  end
+
 
 end
