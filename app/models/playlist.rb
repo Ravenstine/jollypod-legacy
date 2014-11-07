@@ -18,16 +18,20 @@ class Playlist
     
     @pages << download_page
 
-    # 0.times do
-    #   if next_page_token = @pages.last.try(:[], "nextPageToken")
-    #     @pages << download_page(next_page_token)
-    #   else
-    #     break
-    #   end
-    # end
+    loop do
+      if next_page_token = @pages.last.try(:[], "nextPageToken")
+        @pages << download_page(next_page_token)
+      else
+        break
+      end
+    end
 
-    binding.pry
+    # binding.pry
   end
+
+
+  
+
 
   def download_page next_page_token=nil
     uri = "https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&maxResults=50&playlistId=#{@id}&key=#{Rails.application.secrets.youtube_api_key}"
@@ -38,12 +42,12 @@ class Playlist
   def download_info
     uri = "https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=#{@id}&key=#{Rails.application.secrets.youtube_api_key}"
     if response = (JSON.parse URI.parse(uri).read)
-      @title = response["items"][0]["snippet"]["title"]
-      @description = response["items"][0]["snippet"]["description"]
-      @author = response["items"][0]["snippet"]["channelTitle"]
-      @link = "https://youtube.com/user/" + response["items"][0]["snippet"]["channelTitle"]
-      @image = response["items"][0]["snippet"]["thumbnails"]["default"]["url"]
-      @pub_date = response["items"][0]["snippet"]["publishedAt"]
+      @title = response["items"][0]["snippet"]["title"] rescue nil
+      @description = response["items"][0]["snippet"]["description"] rescue nil
+      @author = response["items"][0]["snippet"]["channelTitle"] rescue nil
+      @link = "https://youtube.com/user/" + response["items"][0]["snippet"]["channelTitle"] rescue nil
+      @image = response["items"][0]["snippet"]["thumbnails"]["default"]["url"] rescue nil
+      @pub_date = response["items"][0]["snippet"]["publishedAt"] rescue nil
     else
       nil
     end

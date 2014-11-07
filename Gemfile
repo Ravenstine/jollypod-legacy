@@ -39,9 +39,6 @@ gem 'spring',        group: :development
 # gem 'debugger', group: [:development, :test]
 
 gem 'puma'
-gem 'popen4'
 gem 'pry'
 gem 'pry-byebug'
-# gem 'yt_streams', github: 'riencroonenborghs/yt_streams'
 gem 'viddl-rb', github: 'rb2k/viddl-rb'
-gem 'youtube_it'
