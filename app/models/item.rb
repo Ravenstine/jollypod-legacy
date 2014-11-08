@@ -14,7 +14,7 @@ class Item
       @title = response["items"][0]["snippet"]["title"] rescue nil
       @description = response["items"][0]["snippet"]["description"] rescue nil
       @author = response["items"][0]["snippet"]["channelTitle"] rescue nil
-      @link = "https://youtube.com/user/" + response["items"][0]["snippet"]["channelTitle"] rescue nil
+      @link = @video_id ? "http://youcast.com/#{@video_id}" : nil
       @image = response["items"][0]["snippet"]["thumbnails"]["default"]["url"] rescue nil
       @pub_date = response["items"][0]["snippet"]["publishedAt"] rescue nil
     else
@@ -24,9 +24,9 @@ class Item
 
   def to_s
     "<item>
-      <title>#{@title}</title>
-      <description>#{@description}</description>
-      <itunes:author>#{@author}</itunes:author>
+      <title>#{h(@title)}</title>
+      <description>#{h(@description)}</description>
+      <itunes:author>#{h(@author)}</itunes:author>
       <pubDate>#{@pub_date}</pubDate>
       <enclosure url='#{link}' type='audio/mpeg' /> 
     </item>"

@@ -1,43 +1,47 @@
 require 'net/https'
+require "open-uri"
 
 class Playlist
-
-  attr_accessor :title, :description, :author, :link, :image, :pub_date, :language, :copyright, :items
+  include ERB::Util
+  attr_accessor :title, :description, :author, :link, :image, :pub_date, :language, :copyright, :items, :id
 
   def initialize id
     @id = id
     @pages = []
     @items = []
+    @cache = ActiveSupport::Cache::RedisStore.new
   end
 
   def to_podcast
-    download_info
-    download_pages
-    pages_to_items!
+    unless output = @cache.read(@id)
+      download_info
+      download_pages
+      pages_to_items!
+      output = "<?xml version='1.0' encoding='utf-8'?>
+       <rss version='2.0' xmlns:itunes='http://www.itunes.com/DTDs/Podcast-1.0.dtd' xmlns:media='http://search.yahoo.com/mrss/'>
+        <channel>
+          <title>#{h(@title)}</title>
+          <description>#{h(@description)}</description>
+          <itunes:author>#{@author}</itunes:author>
+          <link>#{@link}</link>
+          <itunes:image href='#{@image}'></itunes:image>
+          <pubDate>#{@pub_date}</pubDate>
+          <language>#{@language}</language>
+          <copyright>#{@copyright}</copyright>
 
-    "<?xml version='1.0' encoding='utf-8'?>
-     <rss version='2.0' xmlns:itunes='http://www.itunes.com/DTDs/Podcast-1.0.dtd' xmlns:media='http://search.yahoo.com/mrss/'>
-      <channel>
-        <title>#{@title}</title>
-        <description>#{@description}</description>
-        <itunes:author>#{@author}</itunes:author>
-        <link>#{@link}</link>
-        <itunes:image href='#{@image}'></itunes:image>
-        <pubDate>#{@pub_date}</pubDate>
-        <language>#{@language}</language>
-        <copyright>#{@copyright}</copyright>
+          #{items_to_s}
 
-        #{items_to_s}
-
-      </channel>
-    </rss>"
+        </channel>
+      </rss>"
+      @cache.write(@id, output, expire_in: 30.minutes)
+      output
+    else
+      output
+    end
   end
 
-  def download_pages
-    require "open-uri"
-    
+  def download_pages    
     @pages << download_page
-
     loop do
       if next_page_token = @pages.last.try(:[], "nextPageToken")
         @pages << download_page(next_page_token)
@@ -45,7 +49,6 @@ class Playlist
         break
       end
     end
-
   end
 
   def download_page next_page_token=nil
@@ -81,11 +84,11 @@ class Playlist
 
   def items_to_s
     output = ""
+    @items.reverse!
     @items.each do |item|
       output += item.to_s
     end
     output
   end
-
 
 end

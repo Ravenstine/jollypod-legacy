@@ -27,28 +27,28 @@ class TestsController < ApplicationController
   end
 
   def playlist
-    rss = RSS::Parser.parse Net::HTTP.get("gdata.youtube.com", "/feeds/api/playlists/#{params[:id]}")
-    podcast = Podcast.new 
-    podcast.title = rss.title.content
-    podcast.description = rss.subtitle.content
-    podcast.author = rss.author.name.content
-    podcast.link = rss.link.href
-    podcast.image = rss.logo.content
-    podcast.pub_date = rss.updated.content
-    podcast.copyright = rss.rights.try(:content)
+    # rss = RSS::Parser.parse Net::HTTP.get("gdata.youtube.com", "/feeds/api/playlists/#{params[:id]}")
+    # podcast = Podcast.new 
+    # podcast.title = rss.title.content
+    # podcast.description = rss.subtitle.content
+    # podcast.author = rss.author.name.content
+    # podcast.link = rss.link.href
+    # podcast.image = rss.logo.content
+    # podcast.pub_date = rss.updated.content
+    # podcast.copyright = rss.rights.try(:content)
 
-    rss.items.each do |element|
-      item = Item.new
-      item.title = element.title.content
-      item.description = element.content.content
-      item.author = element.author.name.content
-      item.pub_date = element.published.content
-      video_id = element.link.href.match(/v=([a-zA-Z0-9_\-]*)/)[1]
-      item.link = "http://104.8.69.205:3000/mp3/#{video_id}"
-      podcast << item
-    end
-    File.open("dump.xml", 'w') { |file| file.write(podcast.to_s) }
-    render xml: podcast.to_s, layout: false
+    # rss.items.each do |element|
+    #   item = Item.new
+    #   item.title = element.title.content
+    #   item.description = element.content.content
+    #   item.author = element.author.name.content
+    #   item.pub_date = element.published.content
+    #   video_id = element.link.href.match(/v=([a-zA-Z0-9_\-]*)/)[1]
+    #   item.link = "http://104.8.69.205:3000/mp3/#{video_id}"
+    #   podcast << item
+    # end
+    # File.open("dump.xml", 'w') { |file| file.write(podcast.to_s) }
+    render xml: Playlist.new(params[:id]).to_podcast, layout: false
   end 
 
 end
