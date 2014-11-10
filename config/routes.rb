@@ -5,8 +5,18 @@ Rails.application.routes.draw do
   # You can have the root of your site routed with "root"
   # root 'welcome#index'
 
-  get "mp3/:id" => 'tests#show'
-  get "playlist/:id" => 'tests#playlist'
+  root 'home#index'
+
+  get "/faq" => 'home#faq', as: :faq
+  get "/contact" => 'home#contact', as: :contact
+
+  get "a/:id" => 'streams#stream'
+  get "p/:id" => 'streams#podcast'
+
+  post "link" => 'home#link', as: :link
+
+  get "/:guid" => "shortlinks#follow"
+
 
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'

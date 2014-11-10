@@ -1,0 +1,23 @@
+= cache do
+  br
+  .row.logo-row
+    = link_to root_path do
+      = image_tag "jollypod.png"
+  .row
+    .large-8.small-12.large-centered.small-centered.columns.text-align-center
+      h2 Turn any YouTube playlist into a podcast feed.
+  .row
+    .large-8.small-12.large-centered.small-centered.columns.text-align-center
+      h6.subheader Episodes will stream as compressed mp3 audio.
+  br
+  .row
+    = form_tag(link_path, method: :post) do
+      .large-6.small-12.large-centered.small-centered.columns
+        .row.collapse
+          .large-10.large-centered.small-12.columns
+            = text_field_tag :url, nil, placeholder: "Paste a YouTube playlist URL here..."
+        .row
+          .large-3.small-5.large-centered.small-centered.columns
+            = button_tag "Podcast-it!", class: "button prefix"
+  br
+  br

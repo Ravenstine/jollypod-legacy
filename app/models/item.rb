@@ -14,7 +14,7 @@ class Item
       @title = response["items"][0]["snippet"]["title"] rescue nil
       @description = response["items"][0]["snippet"]["description"] rescue nil
       @author = response["items"][0]["snippet"]["channelTitle"] rescue nil
-      @link = @video_id ? "http://youcast.com/#{@video_id}" : nil
+      @link = @video_id ? "http://#{DOMAIN}/a/#{@video_id}" : nil
       @image = response["items"][0]["snippet"]["thumbnails"]["default"]["url"] rescue nil
       @pub_date = response["items"][0]["snippet"]["publishedAt"] rescue nil
     else
@@ -30,5 +30,9 @@ class Item
       <pubDate>#{@pub_date}</pubDate>
       <enclosure url='#{link}' type='audio/mpeg' /> 
     </item>"
+  end
+
+  def empty?
+    !pub_date || !title
   end
 end

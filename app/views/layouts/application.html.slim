@@ -3,16 +3,19 @@ html
   head
     meta[name="viewport" content="width=device-width, initial-scale=1.0"]
     title
-      = content_for?(:title) ? yield(:title) : 'Youcast'
-    meta name="description" content="#{content_for?(:description) ? yield(:description) : 'Youcast'}"
+      = content_for?(:title) ? yield(:title) : 'JollyPod'
+    meta name="description" content="#{content_for?(:description) ? yield(:description) : 'Turn any YouTube playlist into a podcast feed.'}"
+    == favicon_link_tag "favicon.png"
     == stylesheet_link_tag "application", :media => 'all', 'data-turbolinks-track' => true
     / Modernizr is required for Zurb Foundation
-    == javascript_include_tag 'vendor/modernizr'
+    / == javascript_include_tag 'vendor/modernizr'
     == javascript_include_tag 'application', 'data-turbolinks-track' => true
     == csrf_meta_tags
   body
     header
-      == render 'layouts/navigation'
+      / == render 'layouts/navigation'
     main[role="main"]
       == render 'layouts/messages'
       == yield
+    footer
+      == render 'layouts/navigation'

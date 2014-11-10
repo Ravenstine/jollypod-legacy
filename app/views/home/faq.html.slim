@@ -1,0 +1,22 @@
+- content_for(:title){"JollyPod - FAQ"}
+- content_for(:description){"Frequently Asked Questions"}
+= cache do
+  .row
+    .large-8.small-12.large-centered.small-centered.columns
+      markdown:
+        FAQs
+        =======
+        #####Q: Does this service cost money?
+        **A:** No.  However, you may incidentally incur data charges when using a podcast with your mobile provider.
+
+        #####Q: My podcast takes a long time to load.  What's up with that?
+        **A:** Gathering the data for every item from a YouTube playlist takes time.  We cache the results for 12 [or more] hours, but sometimes it can take a minute for your podcast client to grab a feed.
+
+        #####Q: Does JollyPod save videos/mp3s from YouTube?
+        **A:** No.  It acts as a direct proxy between YouTube and a podcast player, only transcoding the data that passes.  Media is never saved/stored by us.
+
+        #####Q: I lost my internet connection while streaming a podcast episode, and now I can only start the episode from the beginning.  Why?
+        **A:** At the moment, we cannot [yet] provide support for resuming an audio stream.  The best way around this is to have your client download an episode first before listening to it.
+
+        #####Q: I made a podcast feed from a YouTube playlist but the feed doesn't contain all of the items from the playlist.  Why can't I have all of them?
+        **A:** Two reasons: It's taxing for JollyPod to grab all of the data from a massive playlist, so we limit the amount of items from a playlist to 200(which is plenty for most playlists).  On occasion, JollyPod might not be able to turn every video from a playlist into a podcast episode.  I'm working on that.

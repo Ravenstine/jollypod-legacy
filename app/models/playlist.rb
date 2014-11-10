@@ -1,6 +1,6 @@
 require 'net/https'
 require "open-uri"
-
+require 'digest/sha1'
 class Playlist
   include ERB::Util
   attr_accessor :title, :description, :author, :link, :image, :pub_date, :language, :copyright, :items, :id
@@ -10,6 +10,49 @@ class Playlist
     @pages = []
     @items = []
     @cache = ActiveSupport::Cache::RedisStore.new
+  end
+
+  def self.link_from_guid guid
+    cache = ActiveSupport::Cache::RedisStore.new
+    if id = cache.read(guid)
+      "http://#{DOMAIN}/p/#{id}"
+    else
+      nil
+    end
+  end
+
+  def self.save_guid guid, id
+    cache = ActiveSupport::Cache::RedisStore.new
+    cache.write(guid, id)
+  end
+
+  def self.url_to_url url
+    if id = self.parse_playlist_id(url)
+      "http://#{DOMAIN}/p/#{id}"
+    else
+      nil
+    end
+  end
+
+  def self.url_to_shortlink url
+    if id = self.parse_playlist_id(url)
+      (guid = self.guid(id)) ? "http://#{DOMAIN}/#{guid}" : nil
+    else
+      nil
+    end
+  end
+
+  def self.guid id
+    if (guid = Digest::SHA1.hexdigest(id)[0..6] + id[2..5] rescue nil)
+      self.save_guid guid, id
+      guid
+    else
+      nil
+    end
+  end
+
+  def self.parse_playlist_id url
+    /[&?]list=([a-z0-9_\-]+)/i.match(url).try(:[], 1)
   end
 
   def to_podcast
@@ -33,7 +76,7 @@ class Playlist
 
         </channel>
       </rss>"
-      @cache.write(@id, output, expire_in: 30.minutes)
+      @cache.write(@id, output, expire_in: 12.hours)
       output
     else
       output
@@ -42,7 +85,7 @@ class Playlist
 
   def download_pages    
     @pages << download_page
-    loop do
+    4.times do
       if next_page_token = @pages.last.try(:[], "nextPageToken")
         @pages << download_page(next_page_token)
       else
@@ -63,7 +106,8 @@ class Playlist
       page["items"].each do |item|
         new_item = Item.new(item["contentDetails"]["videoId"])
         new_item.download_info
-        @items << new_item
+        # Next time, let's detect empty JSON items before handing them to the new_item.
+        @items << new_item unless new_item.empty?
       end
     end
   end
