@@ -1,1 +1,1 @@
-DOMAIN = "104.8.69.205:3000"
+DOMAIN = "youcast.com"
